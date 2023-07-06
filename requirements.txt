@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+fastapi-mail
+pydantic
+starlette
+python-dotenv
+tortoise-orm
