@@ -42,8 +42,21 @@ def index():
     return {"Msg": "go to /docs for the API documentation"}
 
 
+
+
+class SupplierRequestModel(supplier_pydanticIn):
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "string",
+                "company": "string",
+                "email": "string",
+                "phone": "string"
+            }
+        }
+
 @app.post('/supplier')
-async def add_supplier(supplier_info: supplier_pydanticIn):
+async def add_supplier(supplier_info: SupplierRequestModel):
     supplier_obj = await Supplier.create(**supplier_info.dict(exclude_unset=True))
     response = await supplier_pydantic.from_tortoise_orm(supplier_obj)
     return {"status": "ok", "data" : response}
@@ -62,7 +75,7 @@ async def get_specific_supplier(id: int):
     return {"status": "ok", "data": response}
 
 @app.put('/supplier/{supplier_id}')
-async def update_supplier(supplier_id: int, update_info: supplier_pydanticIn):
+async def update_supplier(supplier_id: int, update_info: SupplierRequestModel):
     supplier = await Supplier.get(id=supplier_id)
     update_info = update_info.dict(exclude_unset=True)
     supplier.name = update_info['name']
@@ -79,8 +92,22 @@ async def delete_supplier(supplier_id: int):
     await Supplier.get(id=supplier_id).delete()
     return {"status": "ok"}
 
+
+
+class ProductRequestModel(product_pydanticIn):
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "string",
+                "quantity_in_stock": 0,
+                "quantity_sold": 0,
+                "unit_price": 0,
+                "revenue": 0
+            }
+        }
+
 @app.post('/product/{supplier_id}')
-async def add_product(supplier_id: int, products_details: product_pydanticIn):
+async def add_product(supplier_id: int, products_details: ProductRequestModel):
     supplier = await Supplier.get(id = supplier_id)
     products_details = products_details.dict(exclude_unset = True)
     products_details['revenue'] += products_details['quantity_sold'] * products_details['unit_price']
@@ -101,7 +128,7 @@ async def specific_product(id: int):
 
 
 @app.put('/product/{id}')
-async def update_product(id: int, update_info: product_pydanticIn):
+async def update_product(id: int, update_info: ProductRequestModel):
     product = await Product.get(id = id)
     update_info = update_info.dict(exclude_unset = True)
     product.name = update_info['name']
